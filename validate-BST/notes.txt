@@ -1,0 +1,98 @@
+		// Left side test must verify all nodes are smaller than parent AND
+		// all right subtree nodes are not greater than parent
+		if(root->left) {
+			if(rootNodeVal <= root->left->val) {
+				return false;
+			}
+			minLeftNodeVal = rootNodeVal;
+			bfsLeftQueue.push(root->left);
+
+			while(!bfsLeftQueue.empty()) {
+				currentNode = bfsLeftQueue.front();
+				bfsLeftQueue.pop();
+
+				// The left subtree of a node contains only nodes with keys less than the node's key.
+				if(!testLeftNode(currentNode))
+					return false;
+
+				if(currentNode->left) {
+					bfsLeftQueue.push(currentNode->left);
+				}
+				if(currentNode->right) {
+					bfsLeftQueue.push(currentNode->right);
+				}
+			}
+		}
+
+		// Right side test must verify all nodes are greater than parent node AND
+		// all left subtree nodes are 
+		if(root->right) {
+			if(rootNodeVal >= root->right->val) {
+				return false;
+			}
+			minRightNodeVal = rootNodeVal;
+			bfsRightQueue.push(root->right);
+
+			while(!bfsRightQueue.empty()) {
+				currentNode = bfsRightQueue.front();
+				bfsRightQueue.pop();
+
+				// The right subtree of a node contains only nodes with keys greater than the node's key.
+				if(!testRightNode(currentNode))
+					return false;
+
+				if(currentNode->left) {
+					bfsRightQueue.push(currentNode->left);
+				}
+				if(currentNode->right) {
+					bfsRightQueue.push(currentNode->right);
+				}
+			}
+		}
+
+		return true;
+	}
+
+	bool testRightNode(TreeNode* node) {
+		int nodeValue = node->val;
+		
+		if(nodeValue < minRightNodeVal)
+			return false;
+
+		if(node->left) {
+			if(nodeValue <= (node->left->val) ) {	// left values should be less
+				return false;
+			}
+			else if(maxRightNodeVal <= (node->left->val))
+			{
+				return false;
+			}
+		}
+		if(node->right) {
+			if(nodeValue >= (node->right->val) ) {	// right value should be greater
+				return false;
+			}
+		}
+		minRightNodeVal = nodeValue+1;
+		return true;
+	}
+	// less than last
+	bool testLeftNode(TreeNode* node) {
+		int nodeValue = node->val;
+
+		if(nodeValue > maxLeftNodeVal)
+			return false;
+
+		if(node->left) {
+			if(nodeValue <= (node->left->val) ) {	// left values should be less
+				return false;
+			}
+		}
+		if(node->right) {
+			if(nodeValue >= (node->right->val) ) {	// right value should be greater
+				return false;
+			}
+		}
+		maxLeftNodeVal = nodeValue-1;
+
+		return true;

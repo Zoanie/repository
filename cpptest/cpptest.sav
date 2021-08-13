@@ -1,0 +1,191 @@
+/*
+ * cpptest.cpp
+ *
+ *  Created on: Aug 1, 2020
+ *      Author: carlos
+ */
+
+#include <cstdlib>
+#include <thread>
+#include <string>
+#include <iostream>
+#include <fstream>      // ifstream, ofstream, filebuf
+#include <cstdint>
+#include <boost/lexical_cast.hpp>	// requires installation: sudo apt-get install libboost-all-dev
+#include <map>
+#include <vector>
+// Can't get this to work
+// #include <experimental/filesystem>	// 'experimental' is require - this is too good not to pull into a project
+// namespace fs = std::experimental::filesystem;
+
+using namespace std;
+
+/* Given a positive integer N. The task is to calculate the factorial of N.
+ *
+
+ Input:
+ The first line contains an integer 'T' denoting the total number of test cases.
+ T testcases follow. In each test cases, it contains an integer 'N'.
+
+ Output:
+ For each testcase in a new line, print the factorial of N.
+
+ Constraints:
+ 1 <= T <= 19
+ 0 <= N <= 18
+
+ Example:
+ Input:
+ 2
+ 1
+ 4
+
+ Output:
+ 1
+ 24
+ */
+
+int factorial(int n)
+{
+  if(n < 0)
+    return -1;
+  if(0 == n)
+    return 1;
+
+  return (n*factorial(n-1));
+}
+
+uint32_t getNumCpuThreads()
+{
+uint32_t numThreads = thread::hardware_concurrency();
+
+  cout << "Number of hardware threads = " << numThreads << endl;
+  return(numThreads);
+}
+
+string writeArgsToFile(int argc, char **argv)
+{
+ofstream ofs;
+string fext = ".txt";
+string fname(argv[0] + fext);
+
+  ofs.open(fname);
+  if(ofs)
+  {
+    for(int line=0; line<argc; line++)
+    {
+      ofs << *argv++ << endl;
+    }
+  }
+  ofs.close();
+  return fname;
+}
+
+int readArgsFromFile(string fname)
+{
+ifstream ifs;
+string fline;
+
+  ifs.open(fname);
+
+  // first argument is the executable filename, skip over it
+  getline(ifs, fline);
+
+  int linenum=0;
+  while(ifs)
+  {
+	  if(getline(ifs, fline))
+	  {
+	  	  cout << "Line " << ++linenum << "[" << fline << "]" << endl;
+	  }
+  }
+  ifs.close();
+
+  return linenum;
+
+}
+
+void usage()
+{
+    cout << "Usage: ./cpptest <number test cases T, (1 <= T <= 19)> <test inputs: N1 N2 N3...NT, (0 <= N <= 18)\n";
+}
+
+int main(int argc, char *argv[])
+{
+  if(argc < 4)
+  {
+	usage();
+    exit(-1);
+  }
+
+  string fname = writeArgsToFile(argc, argv);
+  // readArgsFromFile(fname);
+
+  int T = 0;
+  int N = 0;
+  string fline;
+  ifstream ifs;
+
+  ifs.open(fname);
+
+  // first argument is the executable filename, we can skip over it
+  getline(ifs, fline);
+
+  // second argument is the number of test cases T
+  getline(ifs, fline);
+
+  try {
+	  T = boost::lexical_cast<int>(fline);
+  }
+  catch (boost::bad_lexical_cast &e) {
+	    cout << "Exception caught : " << e.what() << endl;
+	    exit(-2);
+  }
+
+  //
+  if(1 > T || 19 < T)
+  {
+	  cout << "Test constraint violation. Number tests cases T out of range, (1 <= T <= 19)" << endl;
+	  return (-3);
+  }
+
+  cout << "T = " << T <<  endl;
+
+  int Nfactorial = 0;
+  map<int, int> testResult;
+
+  while(ifs) {
+	  if(getline(ifs, fline))
+	  {
+		  try {
+			  N = boost::lexical_cast<int>(fline);
+		  }
+		  catch (boost::bad_lexical_cast &e) {
+			  cout << "Exception caught : " << e.what() << endl;
+			  exit(-4);
+		  }
+
+		  // Using recursion
+		  Nfactorial = factorial(N);
+		  cout << N << "! = " << Nfactorial << endl;
+
+		  testResult.insert(pair<int, int>(N, Nfactorial));
+	  }
+  }
+
+  cout << "Input:" << endl;
+  cout << T << endl;
+  for(auto& key_and_val : testResult) {
+	  cout << key_and_val.first << endl;
+  }
+  cout << endl;
+
+  cout << "Output:" << endl;
+  for(auto& key_and_val : testResult) {
+	  cout << key_and_val.second << endl;
+  }
+
+  return 0;
+}
+
+

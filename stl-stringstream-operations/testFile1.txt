@@ -1,0 +1,1 @@
+garbage stuff....then first delimiter ->(All the words I care about)<- second delimiter and the rest

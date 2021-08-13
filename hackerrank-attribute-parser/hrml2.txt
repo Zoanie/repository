@@ -1,0 +1,10 @@
+6 3
+<tag1 t1key = "t1value">
+<tag2 t2key = "t2value">
+<tag3 t3key1 = "t3value1" t3key2 = "t3value2">
+</tag3>
+</tag2>
+</tag1>
+tag1~t1key
+tag1.tag2.tag3~t3key2
+tag1.tag2~t2key
