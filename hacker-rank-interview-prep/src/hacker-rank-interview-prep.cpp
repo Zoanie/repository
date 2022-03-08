@@ -301,9 +301,12 @@ void minimumBribesRev(vector<int> q) {
         // ahead of its original position.
         int max_ahead_idx = (sticker - 2) > 0 ? (sticker-2):0;
 
+        // rend() is pointer to theoretical element preceding the first element (mirror of end())
+        // rbase()
         auto last_idx = distance(q.rend(), q.rend() + max_ahead_idx);
+        // a reverse_iterator has always an offset of -1 with respect to its base iterator
         auto idx = distance(q.begin(), rit.base()) - 1;
-        printf("counting from idx=%ld to last_idx=%ld\n", idx, last_idx);
+        printf("counting from idx=%ld to last_idx=%ld\n", (long int) idx, (long int) last_idx);
         auto last_it = max_ahead_idx > 0 ? q.rend() - max_ahead_idx : q.rend();
         printf("counting from sticker=%d to origin-1=%d\n", *rit, *last_it);
         int bribes = count_if(rit, last_it,
@@ -534,21 +537,21 @@ https://www.statisticshowto.com/probability-and-statistics/probability-main-inde
 The hardest part about solving permutation and combination problems is:
     Which is a combination and which is a permutation?
 
-Combination: If you don’t care what order you have things, it’s a combination. Think of combining ingredients,
+Combination: If you don't care what order you have things, it's a combination. Think of combining ingredients,
     or musical chords: Flour, salt and water in a bowl is the same as salt, water and flour. Lottery tickets,
-    where you pick a few numbers, are a combination. That’s because the order doesn’t matter (but the numbers
+    where you pick a few numbers, are a combination. That's because the order doesn't matter (but the numbers
     you select do). You can also have combinations in mathematics, like combinations of functions or linear
     combinations.
 
 Permutation: IF YOU DO CARE ABOUT ORDER, IT'S A PERMUTATION. Picking winners for a first, second and third
-    place raffle is a permutation, because the order matters. Permutation isn’t a word you use in everyday
-    language. It’s the more complex of the two. Details matters: Eggs first? Then salt? Or flour first?
+    place raffle is a permutation, because the order matters. Permutation isn't a word you use in everyday
+    language. It's the more complex of the two. Details matters: Eggs first? Then salt? Or flour first?
 
 Permutations = More Possibilities
 
-You always have fewer combinations than permutations, and here’s why:
-Take the numbers 1, 2, 3, 4. If you want to know how many ways you can select 3 items where the order doesn’t
-matter (and the items aren’t allowed to repeat), you can pick:
+You always have fewer combinations than permutations, and here's why:
+Take the numbers 1, 2, 3, 4. If you want to know how many ways you can select 3 items where the order doesn't
+matter (and the items aren't allowed to repeat), you can pick:
 
 123
 234
@@ -575,13 +578,13 @@ Repetitions are just repeating numbers. They become important when it comes to c
 Allowing repetition depends on your situation. For example:
 
     o Combination locks can have any number in any position (for example, 9, 8, 9, 2), so repetitions are
-      allowed. The number “9” appears twice here.
+      allowed. The number "9" appears twice here.
 
-    o Lottery numbers don’t allow repetition. The same number won’t appear twice in the same ticket. For
-      example, you can pick numbers 67, 76, and 99. But you can’t choose 67, 67, and 67 as your winning ticket.
+    o Lottery numbers don't allow repetition. The same number won't appear twice in the same ticket. For
+      example, you can pick numbers 67, 76, and 99. But you can't choose 67, 67, and 67 as your winning ticket.
 
-Logic should tell you if repetitions are allowed. For example, if you’re dealing with items that
-aren’t going to be replaced (like lottery balls), then you’re looking at no repetitions allowed.
+Logic should tell you if repetitions are allowed. For example, if you're dealing with items that
+aren't going to be replaced (like lottery balls), then you're looking at no repetitions allowed.
 
 The Formulas:
 Combination (C) and permutation (P) each have their own formula:
@@ -837,7 +840,8 @@ void countSwaps(vector<int> a) {
             // Swap adjacent elements if they are in decreasing order
             if (a[j] > a[j + 1]) {
                 numSwaps++;
-                swap(a[j], a[j + 1]);
+                //swap(a[j], a[j + 1]);
+                iter_swap(a.begin()+j, a.begin()+j+1);
             }
         }
     }
@@ -1122,12 +1126,13 @@ int makeAnagram(string s1, string s2) {
     int chars_in_common = 0;
     for(auto ch : s2) {
         int idx = ch - 'a';
+        // It's actually not necessary to use '.at' here as idx is guaranteed be 0 to 25.
         if(freq_map.at(idx)) {
             continue;
         }
         freq_map.at(idx) = true;
         // get a count of chars in common
-        auto it = s1_set.find(ch);
+        auto it = s1_set.find(ch);	// iterator it != end if char is common
         if(it != s1_set.end()) {
             int s1_count = s1_set.count(ch);
             int s2_count = s2_set.count(ch);
@@ -1170,98 +1175,88 @@ Constraints
 
 Each character of the string is a lowercase English letter, ascii[a - z].
  */
-long repeatedTriangleCount(string s) {
-    auto next = begin(s);
-    auto last = end(s);
-    auto match = next;
-    long rCount = 0;
-    long triangleCount = 0;
+int extendPalindrome(string s, int slen, int j, int k, bool odd)
+{
+	int ssCount=0;
 
-    printf("string: '%s'\n", s.c_str());
-    if(next == last) return 0;
-    next++;
-    while(next != last) {
-        printf("match='%c, next='%c'\n", *match, *next);
-        if(*match == *next) {
-            rCount++;
-        }
-        else {
-            if(rCount) {
-                printf("Counting %ld letter '%c' chars\n", rCount+1, *match);
-                triangleCount += triangular_number(rCount+1);
-                rCount = 0;
-            }
-            match = next;
-        }
-        next++;
-    }
-    if(rCount) {
-        printf("Counting %ld letter '%c' chars\n", rCount+1, *match);
-        triangleCount += triangular_number(rCount);
-        rCount = 0;
-    }
+#ifdef DEBUGGING
+	string extString(s);
+	size_t jpos = j;
+	extString.insert(jpos, "[");
+	jpos+=2;
+	extString.insert(jpos, "]");
 
-    return triangleCount;
+	if(j != k) {
+		jpos = k+2;
+		extString.insert(jpos, "[");
+		jpos+=2;
+		extString.insert(jpos, "]");
+	}
+	if(j==k)
+		printf("\nOdd extension  '%s':   j=%d, k=%d: ", extString.c_str(), j, k);
+	else
+		printf("\nEven extension '%s': j=%d, k=%d: ", extString.c_str(), j, k);
+#endif
+	// This is the key logic to finding palindrome substrings.
+	// - The substring remains a palindrome as long as s[j] == s[k]
+	// - The substring increases as j is decremented leftward relative to the string position
+	//   and k is incremented rightward relative to the string position.
+
+	if(odd) {
+		ssCount++;
+		j--; k++;
+	}
+	//bool once = true;
+	const char *left = &s[j];
+	const char *right = &s[k];
+	char match = *left;
+
+	while (j-- >= 0 && k++ < slen && *right == match && (*left-- == *right++)) {
+
+		ssCount++;
+
+		/*
+		if(odd && once) {
+			match = *left;
+			once = false;
+		}*/
+	}
+
+	return ssCount;
 }
 
-long substrCount(int n, string s) {
-    //printf("string: '%s'\n", s.c_str());
-    if(n == 1) {
+
+long substrCount(int sslen, string s)
+{
+    //printf("\nString: '%s'", s.c_str());
+    //printf("\n");
+    if(sslen == 1) {
         return 1;
     }
-    else if(n == 2) {
+    else if(sslen == 2) {
         return (s[0] == s[1]) ? 3 : 2;
     }
-    long sps_count = 0;
-    int rep_count = 0;
 
-    int match = s[0];
-    int left = s[0];
-    int mid = s[1];
-    int right = s[2];
+    long total_ss_count = 0;
+    //bool odd = slen & 1;
+    const char *left = &s[0];
+    const char *right = &s[1];
 
-    for(int i=2; i<n; i++) {
-        left = s[i-2];
-        mid = s[i-1];
-        right = s[i];
-
-        if(match == mid) {
-            rep_count++;
-            //printf("match '%c' = mid '%c, rep_count = %d\n", match, mid, rep_count);
-        }
-        else {
-            if(rep_count) {
-                //printf("Counting %d letters '%c' chars\n", rep_count+1, match);
-                sps_count += triangular_number(rep_count+1);
-                rep_count = 0;
-            }
-            else {
-                sps_count++;
-            }
-            match = mid;
-        }
-
-        if(left != mid) {
-            if(left == right) {
-                //printf("Counting special sequence '%c-%c-%c'\n", left, mid, right);
-                sps_count++;
-            }
-        }
-    }
-    if(mid == right) {
-        rep_count++;
-        sps_count += triangular_number(rep_count);
-        //printf("Adding rep_count %d\n", rep_count);
-    }
-
-    return n + sps_count;
+	for (int i = 0; i < sslen-1; i++) {
+		total_ss_count += extendPalindrome(s, sslen, i, i, true);	// Odd length count
+		if(*left++ == *right++)
+		    total_ss_count += extendPalindrome(s, sslen, i, i+1, false); // Even length count
+		//printf("%ld\r", total_ss_count);
+	}
+	// Add 1 for last character in string
+	return total_ss_count + 1;
 }
 
 int sps_main()
 {
     //ofstream fout(getenv("OUTPUT_PATH"));
     bool fileio = true;
-    string fname("/home/carlos/Documents/hr-sps-test2-input.txt");
+    string fname("C:\\Users\\zoani\\git\\repository\\hacker-rank-interview-prep\\hr-sps-test2-input.txt");
     ifstream ifile(fname);
     istream& str = fileio ? ifile : cin;
 
@@ -1290,7 +1285,12 @@ int sps_main()
     string s;
     getline(str, s);
 
+    auto start = high_resolution_clock::now();
     long result = substrCount(n, s);
+    auto stop = high_resolution_clock::now();
+    cout << "number of substrings: " << result << endl;
+    auto duration = duration_cast<microseconds>(stop - start);
+    cout << "function timing: " << duration.count()/1000000 << " seconds" << endl;
 
     cout << result << endl;
 
@@ -1304,12 +1304,19 @@ int main() {
 	cout << "https://www.hackerrank.com/" << endl;
 	sps_main(); // s/b 1272919
 	return 0;
-    cout << substrCount(8, "mnonopoo") << endl; // s/b 12
-    cout << substrCount(5, "asasd") << endl;    // s/b 7
-    cout << substrCount(7, "abcbaba") << endl;  // s/b 10
-    cout << substrCount(4, "aaaa") << endl;     // s/b 10
-//    cout << substrCount(12, "abbbbabacccc") << endl;     // s/b 10
+	long ss_count = 0;
+	ss_count = substrCount(8, "mnonopoo");
+    cout << "\nTotal substring = " << ss_count << endl; // s/b 12
+    ss_count = substrCount(5, "asasd");    // s/b 7
+    cout << "\nTotal substring = " << ss_count << endl; // s/b 12
+    ss_count = substrCount(7, "abcbaba");  // s/b 10
+    cout << "\nTotal substring = " << ss_count << endl; // s/b 12
+    ss_count = substrCount(4, "aaaa");     // s/b 10
+    cout << "\nTotal substring = " << ss_count << endl; // s/b 12
+    ss_count = substrCount(12, "abbbbabacccc");     // s/b 10
+    cout << "\nTotal substring = " << ss_count << endl; // s/b 12
 	return 0;
+
     cout << activityNotifications({10,20,30,40,50}, 3) << endl;
     cout << activityNotifications({1,2,3,4,4}, 4) << endl;
     cout << activityNotifications({2,3,4,2,3,6,8,4,5}, 5) << endl;
